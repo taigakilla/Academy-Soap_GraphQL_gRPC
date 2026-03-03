@@ -1,0 +1,10 @@
+{
+  "name": "academy-soap-graphql-grpc",
+  "version": "0.0.1",
+  "description": "Projeto base para ensino e apresentação: GraphQL, SOAP e gRPC",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "echo \"Projeto Academy - GraphQL, SOAP e gRPC\""
+  }
+}
