@@ -6,5 +6,9 @@
   "license": "MIT",
   "scripts": {
     "start": "echo \"Projeto Academy - GraphQL, SOAP e gRPC\""
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "@grpc/proto-loader": "^0.8.0"
   }
 }
