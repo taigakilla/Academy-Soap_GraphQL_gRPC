@@ -7,7 +7,8 @@
   "scripts": {
     "start": "echo \"Projeto Academy - GraphQL, SOAP e gRPC\"",
     "start:grpc": "node grpc/server.js",
-    "start:soap": "node soap/server.js"
+    "start:soap": "node soap/server.js",
+    "client:soap": "node soap/client.js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",

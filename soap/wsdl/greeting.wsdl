@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://greeting.soap.academy/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://greeting.soap.academy/"
+  name="GreetingService">
+
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://greeting.soap.academy/">
+      <xsd:complexType name="GreetingRequest">
+        <xsd:sequence>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="language" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="GreetingResponse">
+        <xsd:sequence>
+          <xsd:element name="greeting" type="xsd:string"/>
+          <xsd:element name="timestamp" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="SayHelloRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="SayHelloResponse">
+    <wsdl:part name="message" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="SayHelloMultipleRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="SayHelloMultipleResponse">
+    <wsdl:part name="message1" type="xsd:string"/>
+    <wsdl:part name="message2" type="xsd:string"/>
+    <wsdl:part name="message3" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="SayGoodbyeRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="SayGoodbyeResponse">
+    <wsdl:part name="message" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="GetGreetingRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+    <wsdl:part name="language" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="GetGreetingResponse">
+    <wsdl:part name="greeting" type="xsd:string"/>
+    <wsdl:part name="timestamp" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="ValidateNameRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="ValidateNameResponse">
+    <wsdl:part name="valid" type="xsd:boolean"/>
+  </wsdl:message>
+
+  <wsdl:portType name="GreetingPortType">
+    <wsdl:operation name="SayHello">
+      <wsdl:input message="tns:SayHelloRequest"/>
+      <wsdl:output message="tns:SayHelloResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="SayHelloMultiple">
+      <wsdl:input message="tns:SayHelloMultipleRequest"/>
+      <wsdl:output message="tns:SayHelloMultipleResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="SayGoodbye">
+      <wsdl:input message="tns:SayGoodbyeRequest"/>
+      <wsdl:output message="tns:SayGoodbyeResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetGreeting">
+      <wsdl:input message="tns:GetGreetingRequest"/>
+      <wsdl:output message="tns:GetGreetingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="ValidateName">
+      <wsdl:input message="tns:ValidateNameRequest"/>
+      <wsdl:output message="tns:ValidateNameResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="GreetingBinding" type="tns:GreetingPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="SayHello">
+      <soap:operation soapAction="SayHello"/>
+      <wsdl:input><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:input>
+      <wsdl:output><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SayHelloMultiple">
+      <soap:operation soapAction="SayHelloMultiple"/>
+      <wsdl:input><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:input>
+      <wsdl:output><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SayGoodbye">
+      <soap:operation soapAction="SayGoodbye"/>
+      <wsdl:input><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:input>
+      <wsdl:output><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGreeting">
+      <soap:operation soapAction="GetGreeting"/>
+      <wsdl:input><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:input>
+      <wsdl:output><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidateName">
+      <soap:operation soapAction="ValidateName"/>
+      <wsdl:input><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:input>
+      <wsdl:output><soap:body use="encoded" namespace="http://greeting.soap.academy/"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="GreetingService">
+    <wsdl:port name="GreetingPort" binding="tns:GreetingBinding">
+      <soap:address location="http://localhost:8080/ws/greeting"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
