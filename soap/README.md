@@ -4,9 +4,9 @@ Este projeto faz parte de uma apresentação técnica sobre SOAP.
 
 A ideia é criar um desafio prático e simples para entender:
 
--   ✅ Como o WSDL define o contrato
--   ✅ Como adicionar novas operações ao serviço
--   ✅ A relação entre WSDL e implementação no servidor
+-   ✅ Como consumir um serviço SOAP a partir do WSDL
+-   ✅ Como o WSDL define o contrato e gera os métodos do cliente
+-   ✅ Como tratar SOAP Fault nas respostas
 
 Este desafio foi pensado para ser resolvido em **10--15 minutos**.
 
@@ -59,59 +59,42 @@ http://localhost:8080/ws/greeting
 
 ------------------------------------------------------------------------
 
-# 🧪 Testando com Postman (Recomendado)
+# 🧪 Explorando o serviço (opcional)
 
-👉 Todas as chamadas do desafio devem ser feitas usando o Postman.
+Antes de codar, você pode explorar o WSDL e as operações:
 
-Como parte do desafio, vocês também deverão:
-
-- Descobrir as operações via `?wsdl` (GET http://localhost:8080/ws/greeting?wsdl)
-- Configurar os headers (`Content-Type: text/xml`, `SOAPAction`)
-- Montar o body XML para cada operação
-- Garantir que o request está no formato correto
-
----
-
-### 1️⃣ Descobrir o WSDL
-
-1. Crie uma requisição **GET**
-2. URL: `http://localhost:8080/ws/greeting?wsdl`
-3. Analise a estrutura: `GreetingService`, operações disponíveis, tipos de entrada/saída
-
-------------------------------------------------------------------------
-
-### 2️⃣ Criar uma Requisição SOAP
-
-1. Crie uma requisição **POST**
-2. URL: `http://localhost:8080/ws/greeting`
-3. Descubra os headers e o formato do body necessários
+- **WSDL:** GET `http://localhost:8080/ws/greeting?wsdl` — veja o contrato e as operações disponíveis
+- **Postman:** Útil para testar as operações manualmente (POST, headers `Content-Type: text/xml` e `SOAPAction`)
 
 ------------------------------------------------------------------------
 
 # 🎯 O Desafio
 
-Você receberá um projeto SOAP já configurado com `SayHello` e `SayHelloMultiple`.
+Você receberá um servidor SOAP já rodando com o `GreetingService`.
 
 Sua missão:
 
-**Adicionar uma nova operação** ao `GreetingService`.
+**Criar um script Node.js que consuma o serviço SOAP** usando a biblioteca `soap`.
 
 ------------------------------------------------------------------------
 
 ## 🔹 O que fazer
 
-Crie uma operação chamada:
+Crie um arquivo (ex: `client.js`) que:
 
-    SayGoodbye
+1. Conecte ao WSDL: `http://localhost:8080/ws/greeting?wsdl`
+2. Chame `SayHello` com um nome e exiba a resposta
+3. Chame `GetGreeting` com `name` e `language` e exiba o resultado
+4. Chame `ValidateName` com `name` vazio e **trate o SOAP Fault** (não deixe quebrar)
 
-Regras:
+------------------------------------------------------------------------
 
--   Receber o parâmetro `name`
--   Retornar uma mensagem de despedida no formato:
+## 🔹 Dicas
 
-```
-Goodbye, {name}! See you soon.
-```
+- Use `soap.createClient(url, callback)` para criar o cliente
+- O cliente expõe métodos em `client.GreetingService.GreetingPort.[NomeDaOperação]`
+- Cada método recebe `(args, callback)` onde `args` é um objeto com os parâmetros
+- O callback recebe `(err, result)` — em caso de Fault, `err` virá preenchido
 
 ------------------------------------------------------------------------
 
@@ -119,21 +102,21 @@ Goodbye, {name}! See you soon.
 
 Ao finalizar o desafio, você deve entender:
 
--   Como o arquivo WSDL define o contrato do serviço
--   Onde declarar novas operações (portType, binding, types)
--   Como mapear a operação no servidor Node.js
+-   Como o WSDL permite gerar um cliente automaticamente
+-   Como chamar operações SOAP a partir de código Node.js
+-   Como tratar erros (SOAP Fault) nas respostas
 
 ------------------------------------------------------------------------
 
-# 📚 Conceitos Extras (para explorar)
+# 📚 O que você vai encontrar
 
-O projeto inclui exemplos de funcionalidades adicionais do SOAP:
+Ao consumir o serviço, você lidará com:
 
 | Conceito | Onde ver | O que é |
 |----------|----------|---------|
-| **Tipos complexos** | `GetGreeting` | Operação com múltiplos params (name, language) e retorno (greeting, timestamp). WSDL em `<types>` com `complexType`. |
-| **SOAP Fault** | `ValidateName` | Retorna erro estruturado quando `name` vazio. Use `callback(new Error("..."))` para gerar Fault. |
-| **Cliente SOAP** | `soap/client.js` | Consumir o serviço via `soap.createClient(url)`. Rode `npm run client:soap` (servidor deve estar ativo). |
+| **Operações simples** | `SayHello` | Um parâmetro, uma resposta. |
+| **Múltiplos parâmetros** | `GetGreeting` | Recebe `name` e `language`, retorna `greeting` e `timestamp`. |
+| **SOAP Fault** | `ValidateName` com `name` vazio | O servidor retorna erro estruturado. O callback receberá `err` preenchido. |
 
 ------------------------------------------------------------------------
 
