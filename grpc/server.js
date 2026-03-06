@@ -5,11 +5,11 @@ const protoLoader = require("@grpc/proto-loader");
 const PROTO_PATH = path.join(__dirname, "protos", "greeting.proto");
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
+	keepCase: true,
+	longs: String,
+	enums: String,
+	defaults: true,
+	oneofs: true,
 });
 
 const proto = grpc.loadPackageDefinition(packageDefinition);
@@ -50,63 +50,46 @@ const proto = grpc.loadPackageDefinition(packageDefinition);
 
 // 🔹 Unary RPC
 function sayHello(call, callback) {
-  /*
-    TODO:
+	const name = call.request.name;
 
-    Step 1: Get the name from call.request
-    Step 2: Build the message string
-    Step 3: Return the response using callback(null, { message: ... })
-
-    Example format:
-    "Hello, Davi! Welcome to gRPC."
-  */
-
-  callback(new Error("Not implemented"));
+	callback(null, { message: `Hello ${name}, Welcome to gRPC` });
 }
 
 // Helper function (you may use it)
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // 🔹 Server Streaming RPC
 async function sayHelloStream(call) {
-  /*
-    TODO:
+	const name = call.request.name;
 
-    Step 1: Get the name from call.request
-    Step 2: Create 3 different messages using the name
-    Step 3: For each message:
-            - call.write({ message: ... })
-            - wait 5 seconds
-    Step 4: Call call.end()
+	call.write({ message: `Welcome ${name}` });
+	sleep(5000);
 
-    Expected behavior:
-    The client should receive 3 messages, one per second.
-  */
+	call.write({ message: `Your name is ${name}` });
+	sleep(5000);
 
-  call.emit("error", new Error("Not implemented"));
+	call.write({ message: `Three mensages for ${name}` });
+	sleep(5000);
+
+	call.end();
 }
 
 function main() {
-  const server = new grpc.Server();
+	const server = new grpc.Server();
 
-  server.addService(proto.greeting.GreetingService.service, {
-    SayHello: sayHello,
-    SayHelloStream: sayHelloStream,
-  });
+	server.addService(proto.greeting.GreetingService.service, {
+		SayHello: sayHello,
+		SayHelloStream: sayHelloStream,
+	});
 
-  const address = "0.0.0.0:5001";
+	const address = "0.0.0.0:5001";
 
-  server.bindAsync(
-    address,
-    grpc.ServerCredentials.createInsecure(),
-    (err) => {
-      if (err) throw err;
-      console.log(`gRPC server listening on ${address}`);
-      server.start();
-    }
-  );
+	server.bindAsync(address, grpc.ServerCredentials.createInsecure(), (err) => {
+		if (err) throw err;
+		console.log(`gRPC server listening on ${address}`);
+	});
 }
 
 main();
