@@ -127,3 +127,11 @@ let commentIdCounter = 5;
 export const generateUserId = () => `user-${userIdCounter++}`;
 export const generatePostId = () => `post-${postIdCounter++}`;
 export const generateCommentId = () => `comment-${commentIdCounter++}`;
+
+export const nowInBrazilISO = () => {
+  const date = new Date();
+  const brazil = new Date(
+    date.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
+  );
+  return brazil.toISOString();
+};

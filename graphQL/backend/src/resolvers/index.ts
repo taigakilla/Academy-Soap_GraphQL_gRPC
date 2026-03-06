@@ -1,217 +1,228 @@
 import { GraphQLError } from "graphql";
 import {
-	comments,
-	generateCommentId,
-	generatePostId,
-	posts,
-	users,
+  comments,
+  generateCommentId,
+  generatePostId,
+  nowInBrazilISO,
+  posts,
+  users,
 } from "../data/store";
 import type {
-	CreateCommentInput,
-	CreatePostInput,
-	PaginationInput,
-	Post,
-	PostsFilter,
-	UpdatePostInput,
+  CreateCommentInput,
+  CreatePostInput,
+  PaginationInput,
+  Post,
+  PostsFilter,
+  UpdatePostInput,
 } from "../types";
 
 export const resolvers = {
-	// -------------------------------------------------------
-	// QUERY RESOLVERS
-	// -------------------------------------------------------
-	Query: {
-		users: () => users,
+  // -------------------------------------------------------
+  // QUERY RESOLVERS
+  // -------------------------------------------------------
+  Query: {
+    users: () => users,
 
-		// -------------------------------------------------------
-		// DESAFIO 1: Retornar usuário por ID
-		// Implemente: busque pelo id, retorne null se não encontrar
-		// -------------------------------------------------------
-		user: (_: unknown, { id }: { id: string }) =>
-			users.find((u) => u.id === id) ?? null,
+    user: (_: unknown, { id }: { id: string }) => {
+      users.find((u) => u.id === id) ?? null;
+    },
 
-		// -------------------------------------------------------
-		// DESAFIO 2: Retornar posts com filtros e paginação
-		// Implemente: aplique os filtros de PostsFilter e paginação
-		// Retorne um PostsConnection com nodes, totalCount e hasNextPage
-		// -------------------------------------------------------
-		posts: (
-			_: unknown,
-			{
-				filter,
-				pagination,
-			}: { filter?: PostsFilter; pagination?: PaginationInput },
-		) => {
-			let filtered = [...posts];
+    posts: (
+      _: unknown,
+      {
+        filter,
+        pagination,
+      }: { filter?: PostsFilter; pagination?: PaginationInput },
+    ) => {
+      let filtered = [...posts];
 
-			if (filter) {
-				if (filter.published !== undefined) {
-					filtered = filtered.filter((p) => p.published === filter.published);
-				}
+      if (filter) {
+        if (filter.published !== undefined) {
+          filtered = filtered.filter((p) => p.published === filter.published);
+        }
 
-				if (filter.authorId != null) {
-					filtered = filtered.filter((p) => p.authorId === filter.authorId);
-				}
+        if (filter.authorId != null) {
+          filtered = filtered.filter((p) => p.authorId === filter.authorId);
+        }
 
-				if (filter.tag != null) {
-					filtered = filtered.filter((p) =>
-						p.tags.includes(filter.tag as string),
-					);
-				}
+        if (filter.tag != null) {
+          filtered = filtered.filter((p) =>
+            p.tags.includes(filter.tag as string),
+          );
+        }
 
-				if (filter.search != null && filter.search.trim() !== "") {
-					const term = filter.search.toLowerCase();
-					filtered = filtered.filter(
-						(p) =>
-							p.title.toLowerCase().includes(term) ||
-							p.content.toLowerCase().includes(term),
-					);
-				}
-			}
+        if (filter.search != null && filter.search.trim() !== "") {
+          const term = filter.search.toLowerCase();
+          filtered = filtered.filter(
+            (p) =>
+              p.title.toLowerCase().includes(term) ||
+              p.content.toLowerCase().includes(term),
+          );
+        }
+      }
 
-			const totalCount = filtered.length;
-			const offset = pagination?.offset ?? 0;
-			const limit = pagination?.limit ?? totalCount;
-			const nodes = filtered.slice(offset, offset + limit);
-			const hasNextPage = offset + limit < totalCount;
-		},
+      const totalCount = filtered.length;
+      const offset = pagination?.offset ?? 0;
+      const limit = pagination?.limit ?? totalCount;
+      const nodes = filtered.slice(offset, offset + limit);
+      const hasNextPage = offset + limit < totalCount;
 
-		// -------------------------------------------------------
-		// DESAFIO 2: Retornar post por ID
-		// Implemente: busque pelo id, retorne null se não encontrar
-		// -------------------------------------------------------
-		post: (_: unknown, { id }: { id: string }) => {
-			// TODO
-		},
+      return {
+        nodes,
+        totalCount,
+        hasNextPage,
+      };
+    },
 
-		// -------------------------------------------------------
-		// DESAFIO 3: Retornar posts mais vistos
-		// Implemente: ordene por viewCount DESC, limite pelo parâmetro
-		// Dica: use slice após sort para não mutar o array original
-		// -------------------------------------------------------
-		trendingPosts: (_: unknown, { limit }: { limit?: number }) => {
-			// TODO
-		},
+    post: (_: unknown, { id }: { id: string }) => {
+      posts.find((p) => p.id === id) ?? null;
+    },
 
-		// -------------------------------------------------------
-		// DESAFIO 3: Retornar posts de um autor
-		// Implemente: filtre posts pelo authorId
-		// -------------------------------------------------------
-		postsByAuthor: (_: unknown, { authorId }: { authorId: string }) => {
-			// TODO
-		},
+    trendingPosts: (_: unknown, { limit }: { limit?: number }) => {
+      const sorted = [...posts].sort((a, b) => b.viewCount - a.viewCount);
+      return limit !== null ? sorted.slice(0, limit) : sorted;
+    },
 
-		// -------------------------------------------------------
-		// DESAFIO 3: Retornar comentários de um post
-		// Implemente: filtre comentários pelo postId
-		// -------------------------------------------------------
-		commentsByPost: (_: unknown, { postId }: { postId: string }) => {
-			// TODO
-		},
-	},
+    postsByAuthor: (_: unknown, { authorId }: { authorId: string }) => {
+      posts.filter((p) => p.authorId === authorId) ?? null;
+    },
 
-	// -------------------------------------------------------
-	// MUTATION RESOLVERS
-	// -------------------------------------------------------
-	Mutation: {
-		// -------------------------------------------------------
-		// DESAFIO 5: Criar novo post
-		// Implemente: valide que o autor existe, crie o post com ID único
-		// e data atual, adicione ao store e retorne o post criado
-		// -------------------------------------------------------
-		createPost: (_: unknown, { input }: { input: CreatePostInput }) => {
-			// TODO
-		},
+    commentsByPost: (_: unknown, { postId }: { postId: string }) => {
+      comments.filter((c) => c.postId === postId);
+    },
+  },
 
-		// -------------------------------------------------------
-		// DESAFIO 5: Atualizar post existente
-		// Implemente: valide que o post existe, atualize apenas os
-		// campos fornecidos no input (patch parcial), atualize updatedAt
-		// e retorne o post atualizado
-		// -------------------------------------------------------
-		updatePost: (
-			_: unknown,
-			{ id, input }: { id: string; input: UpdatePostInput },
-		) => {
-			// TODO
-		},
+  // -------------------------------------------------------
+  // MUTATION RESOLVERS
+  // -------------------------------------------------------
+  Mutation: {
+    createPost: (_: unknown, { input }: { input: CreatePostInput }) => {
+      const { title, content, tags, published, authorId } = input;
+      const now = nowInBrazilISO();
+      const author = users.find((u) => u.id === authorId) ?? null;
 
-		// -------------------------------------------------------
-		// DESAFIO 5: Deletar post
-		// Implemente: verifique se o post existe, remova do store
-		// e retorne true. Se não encontrar, retorne false.
-		// -------------------------------------------------------
-		deletePost: (_: unknown, { id }: { id: string }) => {
-			// TODO
-		},
+      if (!author || author.role !== "AUTHOR") {
+        throw new GraphQLError(`Autor com id ${authorId} não encontrado`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
 
-		// -------------------------------------------------------
-		// DESAFIO 5: Criar comentário
-		// Implemente: valide que o post existe e o autor existe,
-		// crie o comentário com ID único e adicione ao store
-		// -------------------------------------------------------
-		createComment: (_: unknown, { input }: { input: CreateCommentInput }) => {
-			// TODO
-		},
+      const newPost: Post = {
+        id: generatePostId(),
+        title: title,
+        content: content,
+        published: published ?? false,
+        authorId: authorId,
+        tags: tags ?? [],
+        viewCount: 0,
+        createdAt: now,
+        updatedAt: now,
+      };
 
-		// -------------------------------------------------------
-		// DESAFIO 5: Incrementar visualizações
-		// Implemente: encontre o post pelo id e incremente viewCount em 1
-		// Retorne o post atualizado ou lance erro se não encontrar
-		// -------------------------------------------------------
-		incrementPostView: (_: unknown, { postId }: { postId: string }) => {
-			// TODO
-		},
-	},
+      posts.push(newPost);
+      return newPost;
+    },
 
-	// -------------------------------------------------------
-	// FIELD RESOLVERS (DESAFIO 4)
-	// Resolvers de campos que precisam buscar dados relacionados
-	// -------------------------------------------------------
+    updatePost: (
+      _: unknown,
+      { id, input }: { id: string; input: UpdatePostInput },
+    ) => {
+      const post = posts.find((p) => p.id === id) ?? null;
 
-	Post: {
-		// -------------------------------------------------------
-		// DESAFIO 4: Resolver o campo author do Post
-		// Implemente: receba o post como parent e retorne o User
-		// correspondente ao authorId
-		// -------------------------------------------------------
-		author: (post: Post) => {
-			// TODO
-		},
+      if (!post) {
+        throw new GraphQLError(`Post com id ${id} não encontrado`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
 
-		comments: (post: Post) => {
-			// TODO
-		},
+      if (input.title !== undefined) post.title = input.title;
+      if (input.content !== undefined) post.content = input.content;
+      if (input.tags !== undefined) post.tags = input.tags;
+      if (input.published !== undefined) post.published = input.published;
+      post.updatedAt = nowInBrazilISO();
 
-		commentCount: (post: Post) => {
-			// TODO
-		},
-	},
+      return post;
+    },
 
-	User: {
-		// -------------------------------------------------------
-		// DESAFIO 4: Resolver o campo posts do User
-		// Implemente: retorne todos os posts publicados do usuário
-		// -------------------------------------------------------
-		posts: (user: { id: string }) => {
-			// TODO
-		},
+    deletePost: (_: unknown, { id }: { id: string }) => {
+      const index = posts.findIndex((p) => p.id === id);
 
-		postCount: (user: { id: string }) => {
-			// TODO
-		},
-	},
+      if (index === -1) return false;
 
-	Comment: {
-		// -------------------------------------------------------
-		// DESAFIO 4: Resolver os campos relacionados do Comment
-		// Implemente: resolva post e author a partir dos IDs
-		// -------------------------------------------------------
-		post: (comment: { postId: string }) => {
-			// TODO
-		},
+      posts.splice(index, 1);
+      return true;
+    },
 
-		author: (comment: { authorId: string }) => {
-			// TODO
-		},
-	},
+    createComment: (_: unknown, { input }: { input: CreateCommentInput }) => {
+      const { body, postId, authorId } = input;
+
+      const now = nowInBrazilISO();
+      const post = posts.find((p) => p.id === postId) ?? null;
+
+      if (!post) {
+        throw new GraphQLError(`Post com id ${post} não encontrado`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+
+      const newComent = {
+        id: generateCommentId(),
+        body: body,
+        postId: postId,
+        authorId: authorId,
+        createdAt: now,
+      };
+
+      comments.push(newComent);
+      return newComent;
+    },
+
+    incrementPostView: (_: unknown, { postId }: { postId: string }) => {
+      const post = posts.find((p) => p.id === postId) ?? null;
+
+      if (!post) {
+        throw new GraphQLError(`Post com id ${post} não encontrado`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+
+      post.viewCount + 1;
+
+      return post;
+    },
+  },
+
+  Post: {
+    author: (post: Post) => {
+      users.find((u) => u.id === post.authorId && u.role === "AUTHOR");
+    },
+
+    comments: (post: Post) => {
+      comments.filter((c) => c.postId === post.id);
+    },
+
+    commentCount: (post: Post) => {
+      comments.filter((c) => c.postId === post.id).length;
+    },
+  },
+
+  User: {
+    posts: (user: { id: string }) => {
+      posts.filter((p) => p.authorId === user.id);
+    },
+
+    postCount: (user: { id: string }) => {
+      posts.filter((p) => p.authorId === user.id).length;
+    },
+  },
+
+  Comment: {
+    post: (comment: { postId: string }) => {
+      posts.find((p) => p.id === comment.postId);
+    },
+
+    author: (comment: { authorId: string }) => {
+      users.find((u) => u.id === comment.authorId && u.role === "AUTHOR");
+    },
+  },
 };
